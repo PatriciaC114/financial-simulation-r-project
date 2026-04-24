@@ -23,7 +23,7 @@ Highlights:
 ## Simulator View
 
 ### Data Entry
-![Personal Data](screenshots/1.jpg)
+![Personal Data](screenshots/1.JPG)
 
 ### Mortgage Selection
 ![Properties](screenshots/2.jpg)
