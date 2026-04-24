@@ -20,3 +20,13 @@ Highlights:
 - Simulation of Euribor-driven mortgage scenarios
 - Decision-support tool for rent vs buy analysis
 
+## Simulator View
+
+### Data Entry
+![Personal Data](screenshots/1.jpg)
+
+### Mortgage Selection
+![Properties](screenshots/2.jpg)
+
+### Mortgage Simulation
+![Mortgage](screenshots/3.jpg)
