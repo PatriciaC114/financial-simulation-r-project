@@ -1,6 +1,6 @@
 ---
-title: "Trabajo de: Matemáticas de las Operaciones Financieras"
-author: "Patricia Cabrera"
+title: "Proyecto de Matemáticas de las Operaciones Financieras"
+author: "Patricia Cabrera Fernández (proyecto académico en grupo)"
 date: "20/1/2025"
 output:
   html_document:
