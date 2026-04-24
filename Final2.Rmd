@@ -1,0 +1,552 @@
+---
+title: "Trabajo de: Matemáticas de las Operaciones Financieras"
+author: "Patricia Cabrera"
+date: "20/1/2025"
+output:
+  html_document:
+    toc: yes
+    df_print: kable
+  html_notebook:
+    toc: yes
+    toc_float:
+      collapsed: no
+    theme: flatly
+    number_sections: yes
+    highlight: haddock
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción
+
+Alquilar una vivienda se ha convertido en una de las mayores dificultades para los jóvenes en el país, debido al constante aumento del precio de la vivienda. Esta problemática actual nos lleva a debatir qué opción resulta más conveniente, especialmente en términos económicos y de estabilidad a largo plazo.
+
+En este trabajo analizaremos las ventajas y desventajas de alquilar frente a comprar un piso, tomando como referencia alquileres reales en la ciudad de Jerez de la Frontera y condiciones hipotecarias realistas. Para ello, utilizaremos un simulador que mostrará diferentes opciones de alquiler, así como la posibilidad de planificar una hipoteca para la compra de un piso con un precio acorde al mercado actual.
+
+El objetivo es proporcionar una herramienta práctica que ayude a tomar decisiones informadas, basadas en datos actualizados y en la situación financiera individual de cada persona. Con este análisis, buscamos ofrecer una visión clara sobre cuál puede ser la mejor alternativa en el contexto económico actual.
+
+## De qué trata nuestro trabajo
+
+Este trabajo constará de dos partes bien diferenciadas: por un lado, la creación de funciones que permitan la construcción de un plan de hipotecas y, por otro, el desarrollo de un programa en la herramienta Shiny de R para diseñar un menú interactivo que facilite la interacción con el usuario.
+
+Para la elaboración de planes hipotecarios, es fundamental comprender su funcionamiento. Una hipoteca no es más que un préstamo otorgado por una entidad bancaria, el cual comparte ciertas características comunes, independientemente del banco que lo conceda. Una de ellas es el sistema utilizado para estructurar el préstamo, que generalmente es el sistema francés, en particular, el sistema francés con pagos constantes.
+
+Este método es el más utilizado debido a su simplicidad para el usuario, ya que ofrece pagos pospagables que facilitan la gestión financiera del ciudadano común. Además, al mantener pagos constantes a lo largo del tiempo, permite una mejor planificación financiera a largo plazo. Estos pagos suelen realizarse de forma mensual, lo que nos permite calcular una hipoteca con base en estos datos.
+
+Para calcular un préstamo hipotecario, necesitamos conocer tres elementos clave: el capital principal, que en este caso será el coste del piso; la tasa de interés aplicada; y la duración del préstamo. Antes de entrar en detalles sobre los intereses y la duración, es importante distinguir entre los dos tipos principales de hipotecas: fijas y variables.
+
+Las hipotecas fijas mantienen un interés constante durante toda su vigencia, lo que proporciona una mayor estabilidad en comparación con las hipotecas variables, cuyo interés puede cambiar después de un período determinado.
+
+A continuación, detallaremos los programas utilizados y los datos seleccionados.
+
+
+```{r}
+# Librerías que necesitamos para este proyecto:
+library(shiny)
+library(bslib)
+```
+
+
+### Data
+
+Primero de todo metemos los datos de 5 pisos de alquiler y 5 pisos de venta. Estos será nuestra base datos la cuál podemos modificar incluso añadir o quitar elementos y no habría que hacer ningún cambio más en los códigos siguentes. Siempre que se tengan los detalles de cada piso como por ejemplo el nombre "Alquiler 1", el precio, la ubicación, la imagen y la descripción. 
+
+```{r}
+
+# Datos de los pisos para alquiler
+
+  pisos_alquiler <- data.frame(
+    id = c("Alquiler 1", "Alquiler 2", "Alquiler 3", "Alquiler 4", "Alquiler 5"),
+    precio = c(400, 800, 580, 600, 500),
+    ubicacion = c(
+      "Calle Ramón de Cala, 19, Jerez de la Frontera",
+      "Calle Amberes, 1, Jerez de la Frontera",
+      "Zona Barriada España, Calle Rui-López, Jerez de la Frontera",
+      "Calle Merced, 37, Jerez de la Frontera",
+      "Avenida del Amontillado, 2, Jerez de la Frontera"
+    ),
+    imagen = c(
+      "alquiler1.png",
+      "alquiler2.png",
+      "alquiler3.png",
+      "alquiler4.png",
+      "alquiler5.png"
+    ),
+    descripcion = c(
+      "71 m², 2 hab., Planta 6ª exterior con ascensor",
+      "92 m², 3 hab., Planta 4ª exterior con ascensor, Garaje incluido",
+      "55 m², Planta 1ª exterior sin ascensor",
+      "80 m², 1 hab., Planta 1ª exterior sin ascensor",
+      "60 m², 2 hab., Planta 2ª exterior sin ascensor"
+    )
+  )
+
+# Datos de los pisos para venta
+
+pisos_venta <- data.frame(
+    id = c("Compra 1", "Compra 2", "Compra 3", "Compra 4", "Compra 5"),
+    precio = c(135e3, 206900, 85e3, 275e3, 160e3),
+    ubicacion = c(
+      "Calle LAS TINAJAS",
+      "Calle Picadueñas, Jerez de la Frontera",
+      "Calle Santiago - Coronación, Jerez de la Frontera",
+      "Calle Pozoalbero, Jerez de la Frontera",
+      "Zona Chapín - Campus Universitario - Calle Navinco, Jerez de la Frontera"
+    ),
+    descripcion = c(
+      "71 m², 2 hab., Planta 6ª exterior con ascensor",
+      "109 m², 3 hab., Planta 3ª exterior con ascensor, Garaje incluido",
+      "81 m², 2 hab., Bajo exterior con ascensor",
+      "Obra nueva, 132 m², 4 hab., Planta 3ª exterior con ascensor, Garaje incluido",
+      "103 m², 4 hab., Planta 7ª exterior con ascensor"
+    ),
+    imagen = c(
+      "compra1.png",
+      "compra2.png",
+      "compra3.png",
+      "compra4.png",
+      "compra5.png"
+    )
+  )
+
+```
+
+
+
+### Hipotecas
+
+En este trabajo, vamos a emplear la tasa de interés nominal fija vigente en Andalucía para el año 2025, que es del 2,38%. El programa utilizado será una adaptación de las funciones previamente desarrolladas en clase, donde usando el código desarrollado en clase haremos una función que pida el precio de la vivienda y los años que se desea la hipoteca.
+
+Ahora, metemos nuestros dos tipos de hipotecas:
+
+
+
+
+#### Hipoteca Fija
+
+```{r}
+Hipoteca_fija <- function(precio, años){
+  
+# Definicion parametros
+principal=precio
+np=años*12
+meses=0:np
+i=0.025 # Tasa de interés anual para plazo fijo que dan ahora mismo los bancos
+i_12=i/12
+
+pago=principal/sum((1+i_12)^(-(1:np))) #tambien se puede usar la función VA
+pagos=c(0,rep(pago,np))
+
+capital_pendiente=c(principal,(1+i_12)^((1:np))*(principal-
+                      cumsum(pagos[-1]*(1+i_12)^(-(1:np)))))
+cuota_capital=c(0,capital_pendiente[-(np+1)]-capital_pendiente[-1])
+capital_amortizado=principal-capital_pendiente
+
+cuota_interes=c(0,capital_pendiente[-(np+1)]*i_12)
+
+tabla_amortizacion=data.frame(meses=meses, 
+            capital_pendiente=capital_pendiente, 
+            cuota_interes=cuota_interes, cuota_capital=cuota_capital, 
+            capital_amortizado=capital_amortizado, pagos=pagos)
+
+# Devolvemos la tabla
+return(tabla_amortizacion)
+}
+```
+
+
+
+
+#### Hipoteca Variable
+
+Para el caso de la hipoteca de interés variable, debemos tener en cuenta que el tipo de interés vendrá dado por la suma del interés de referencia, que suele ser el Euribor, y un interés diferencial, que generalmente se establece en un 1%.
+
+El Euribor (Euro Interbank Offered Rate) es el tipo de interés al que los principales bancos europeos se prestan dinero entre sí en el mercado interbancario. Se calcula diariamente y se utiliza como referencia en numerosos productos financieros, especialmente en hipotecas a tipo variable.
+
+El Euribor varía según el plazo del préstamo, siendo los más comunes el Euribor a 12 meses y a 6 meses. En nuestro caso, consideraremos que varía cada 12 meses, es decir, anualmente. Para construir un simulador que prediga la evolución del Euribor cada año, sería necesario utilizar herramientas de modelizacion financiero avanzadas, lo que está fuera del alcance de este trabajo. Por ello, optaremos por una aproximación más sencilla.
+
+Dado que el Euribor suele rondar el 3%, emplearemos una distribución normal para generar valores aleatorios que simulen su variabilidad. Esta distribución nos permite crear una simulación del Euribor ya que tiende a seguir una curva en forma de campana de Gauss. Utilizaremos una distribución normal con media 3% y una desviación típica de 0,1%, evitando así oscilaciones excesivamente alejadas de la realidad. Es importante señalar que este método es una simplificación y que los resultados obtenidos serán meramente orientativos. Para conocer valores reales, sería necesario un estudio más profundo del comportamiento del Euribor.
+
+Construcción del programa:
+Para la implementación del simulador, se solicitarán al usuario dos datos clave: el precio del piso y la duración de la hipoteca en años. Con estos datos, se generará una distribución normal aleatoria con tantos valores como años tenga la hipoteca. Posteriormente, el préstamo se actualizará cada año mediante el siguiente proceso:
+
+Se calcula un primer préstamo con el interés del primer año. Al finalizar el primer año, se toma como nuevo principal el capital pendiente y se realiza un nuevo cálculo de hipoteca con el interés correspondiente al segundo año, reduciendo la duración en un año. Se repite este procedimiento cada año hasta que el préstamo se haya liquidado por completo. De esta manera, obtenemos los pagos anuales (que serán constantes dentro de cada año), así como la evolución del capital pendiente y el resto de datos. El código vendrá dado por :
+
+
+```{r}
+
+Hipoteca_variable <- function(precio, años){
+
+# Definicion parametros
+principal=precio  # Introducimos el principal del prestamo.
+años=años           # Introducimos el numero de años.
+np=años * 12      # Numero total de periodos en los que se paga (los pagos son mensuales luego seria nuestro años por 12).
+meses= 0:np       # Numero total de meses del prestamo.
+
+# Generacion de tasas de interés variables cada año
+set.seed(123)  # Fijar semilla para reproducibilidad.
+Euribor=rnorm(años, 3, 0.1) / 100  # Tasas de interés anuales.
+dif=0.01  # Diferencial fijo.
+
+# Inicializacion de vectores
+capital_pendiente=numeric(np + 1)
+cuota_interes=numeric(np + 1)
+cuota_capital=numeric(np + 1)
+capital_amortizado=numeric(np + 1)
+pagos=numeric(np + 1)
+
+# Asignamos el capital inicial previo a la recurrencia
+capital_pendiente[1]=principal
+
+# Iteramos sobre los años y recalculamos cada 12 meses
+for (año in 1:años) {
+  i=Euribor[año] + dif      # Tasa anual efectiva.
+  i_12=i/12               # Tasa mensual.
+  
+  # Calcular la cuota mensual para este año.
+  pago= principal / sum((1 + i_12)^(-(1:np)))  
+  for (mes in 1:12) {
+    idx= (año - 1) * 12 + mes + 1  # Índice en la tabla
+    
+    if (idx > np + 1) break  # Detener si supera el total de pagos
+    
+    cuota_interes[idx]=capital_pendiente[idx - 1] * i_12
+    cuota_capital[idx]=pago - cuota_interes[idx]
+    
+    # Ajuste final en el último período
+    if (idx == np + 1) {
+      cuota_capital[idx]=capital_pendiente[idx - 1]  # Última cuota = capital pendiente
+      capital_pendiente[idx]= 0  # Forzar a cero
+    } else {
+      capital_pendiente[idx]= capital_pendiente[idx - 1] - cuota_capital[idx]
+    }
+    
+    capital_amortizado[idx]= principal - capital_pendiente[idx]
+    pagos[idx]= pago
+  }
+}
+
+# Crear la tabla de amortización
+tabla_amortizacion <- data.frame(
+  meses = meses, 
+  capital_pendiente = capital_pendiente, 
+  cuota_interes = cuota_interes, 
+  cuota_capital = cuota_capital, 
+  capital_amortizado = capital_amortizado, 
+  pagos = pagos
+)
+
+# Devolvemos la tabla
+return(tabla_amortizacion)
+}
+```
+
+Los datos usados han sido escogidos de la siguiente pagina web de referencia: https://gohipoteca.com/blog/que-suele-costar-una-hipoteca-al-mes-en-espana
+
+# Simulador
+
+El simulador constará de dos partes bien diferenciadas: solicitud de datos al usuario y muestra de distintos alquileres y ventas de pisos en Jerez de la Frontera, además en esta última parte se tendrá la posibilidad de calcular la hipoteca de cada piso.
+
+Para la  solicitud de datos al usuario el programa solicitará al usuario varios datos clave:
+
+- Ahorros disponibles:
+Este dato permitirá clasificar qué pisos pueden optar a hipoteca y cuáles no. Generalmente, para que un banco conceda una hipoteca, el solicitante debe disponer de al menos el 20% del precio del piso como entrada inicial.
+
+- Sueldo mensual neto:
+Servirá para determinar si el usuario puede acceder a ciertos descuentos gubernamentales en el alquiler, según lo establecido en la normativa vigente. Por ejemplo, en Andalucía, existen ayudas al alquiler que dependen de los ingresos, como se detalla en el siguiente enlace://www.juntadeandalucia.es/servicios/sede/tramites/procedimientos/detalle/16413.html el simulador indicará si el usuario cumple con los requisitos para solicitar estas ayudas.
+
+- Edad del usuario:
+La edad también influye en la posibilidad de acceder a determinados descuentos gubernamentales, que a su vez tambien lo mostrará en pantalla para que el usuario sea .
+
+Para las muestra de opciones de vivienda, una vez ingresados los datos, el programa mostrará una lista de viviendas en alquiler y en venta con precios reales obtenidos de plataformas como Idealista.
+
+Cada piso incluirá la siguiente información:
+
+- Renta mensual
+
+- Ubicación
+
+- Breve descripción del inmueble
+
+Además, el usuario podrá calcular la opción de compra mediante hipoteca para cada piso. Esto lo ubicamos en el apartado llamado parte 3 pero forma parte de la 2. Para ello, el programa pedirá la duración que desaría la hipoteca (tiene que ser en un rango de 15 a 30 años que son el mínimo y máximo habitual), el tipo de interés que se prefiere y con el precio del piso (es una estimación por inmuebles similares), el simulador accederá a las funciones previamente explicadas para calcular la hipoteca .
+
+
+## Parte 1
+
+```{r}
+parte1_ui <- function(id) {
+  ns <- NS(id)
+  tagList(
+    numericInput(ns("edad"), "Introduce tu edad (18-100):", value = NULL, min = 18, max = 100),
+    numericInput(ns("sueldo"), "Introduce tu sueldo mensual neto (en euros):", value = NULL, min = 0),
+    numericInput(ns("ahorros"), "Introduce cuánto tienes ahorrado (en euros):", value = NULL, min = 0),
+    actionButton(ns("guardar"), "Guardar"),
+    textOutput(ns("mensaje"))
+  )
+}
+
+parte1_server <- function(input, output, session) {
+  datos <- reactiveValues(edad = NULL, sueldo = NULL, ahorros = NULL, validos = FALSE)
+  
+  observeEvent(input$guardar, {
+    edad <- input$edad
+    sueldo <- input$sueldo
+    ahorros <- input$ahorros
+    
+    if (is.null(edad) || edad < 18 || edad > 100) {
+      output$mensaje <- renderText("Por favor, introduce una edad válida entre 18 y 100 años.")
+      datos$validos <- FALSE
+    } else if (is.null(sueldo) || sueldo < 0) {
+      output$mensaje <- renderText("Por favor, introduce un sueldo mensual válido (no negativo).")
+      datos$validos <- FALSE
+    } else if (is.null(ahorros) || ahorros < 0) {
+      output$mensaje <- renderText("Por favor, introduce una cantidad válida de ahorros (no negativa).")
+      datos$validos <- FALSE
+    } else {
+      datos$edad <- edad
+      datos$sueldo <- sueldo
+      datos$ahorros <- ahorros
+      datos$validos <- TRUE
+      
+      output$mensaje <- renderText({
+        paste(
+          "Datos guardados exitosamente:",
+          paste(" Edad:", edad),
+          paste(" Sueldo mensual neto:", sueldo, "€"),
+          paste(" Ahorros:", ahorros, "€"),
+          sep = "\n"
+        )
+      })
+    }
+  })
+  
+  return(datos)
+}
+
+```
+
+
+## Parte 2
+
+
+```{r}
+parte2_ui <- function(id) {
+  ns <- NS(id)
+  tagList(
+    selectInput(ns("opcion"), "Selecciona una opción:", choices = c("Alquiler", "Compra")),
+    uiOutput(ns("opciones_alquiler")),
+    uiOutput(ns("detalle_piso")),
+    uiOutput(ns("imagen_piso")),
+    textOutput(ns("mensaje_compra")),
+    textOutput(ns("subvencion"))
+  )
+}
+
+parte2_server <- function(input, output, session, datos_personales) {
+  ns <- session$ns
+
+  # Mostrar opciones según la selección
+  output$opciones_alquiler <- renderUI({
+    if (input$opcion == "Alquiler") {
+      selectInput(ns("piso"), "Selecciona un piso:", choices = pisos_alquiler$id)
+    } else if(datos_personales$ahorros < 0.2*min(pisos_venta$precio)){ #Si no tiene dinero suficiente para pedir la hipoteca de ningún piso de nuestro dataframe se lo advertimos al usuario
+      return("No tienes suficientes ahorros para comprar ningún piso de nuestra página.")
+    } else {
+      pisos_disponibles <- pisos_venta[datos_personales$ahorros >= 0.2 * pisos_venta$precio, ]
+      selectInput(ns("piso"), "Selecciona un piso en venta:", choices = pisos_disponibles$id)
+    }
+  })
+  
+  # Mostrar detalles del piso seleccionado
+  output$detalle_piso <- renderUI({
+    req(input$piso, input$opcion)  # Asegura que input$piso y input$opcion existen
+    
+    if (input$opcion == "Alquiler") {
+      piso <- pisos_alquiler[pisos_alquiler$id == input$piso, ]
+    } else if (input$opcion == "Compra" && datos_personales$ahorros > 0.2*min(pisos_venta$precio)) { #Aparece la opción si el dinero de sus ahorros es suficiente para cubrir el 20% del piso de menor valor
+      piso <- pisos_venta[pisos_venta$id == input$piso, ]
+    } else {
+      return(NULL)  # Si no hay un piso válido, no mostrar nada
+    }
+    
+    req(nrow(piso) > 0)  # Asegura que el piso existe
+    tagList(
+      br(),
+      h6(paste("Precio:", piso$precio, "€")),
+      h6(paste("Ubicación:", piso$ubicacion)),
+      h6(paste("Detalles:", piso$descripcion))
+    )
+  })
+  
+  
+  # Mostrar imagen del piso seleccionado
+  output$imagen_piso <- renderUI({
+    req(input$piso, input$opcion)  # Asegura que input$piso y input$opcion existen
+    
+    if (input$opcion == "Alquiler") {
+      piso <- pisos_alquiler[pisos_alquiler$id == input$piso, ]
+    } else if (input$opcion == "Compra" && datos_personales$ahorros > 0.2 * min(pisos_venta$precio)) { 
+      piso <- pisos_venta[pisos_venta$id == input$piso, ]
+    } else {
+      return(NULL)
+    }
+    
+    req(nrow(piso) > 0)  # Asegura que el piso existe
+    
+    tagList(
+      tags$img(src = piso$imagen, height = 200, width = 200)
+    )
+    
+
+    
+  #Le mostramos después un botón por si desea conocer la tabla de amortización de su posible hipoteca para la compra del piso que esta visualizando
+    if (input$opcion == "Compra") { 
+      actionButton(ns("calcula_hipoteca"), "Calcula tu hipoteca")
+    }
+    
+  })
+  
+  #Vemos si cumple los requisitos para la subvención
+  output$subvencion <- renderText({
+    req(input$piso)  # Asegura que haya un piso seleccionado antes de continuar
+    
+    if (input$opcion == "Alquiler") {
+      piso <- pisos_alquiler[pisos_alquiler$id == input$piso, ]  # Obtiene los datos del piso seleccionado
+      
+      #Ahora comprobamos los requisitos de la subvención ya que la renta mensual de alquiler no puede ser superior a 600€ y el sueldo mensual mayor de una cantidad
+      if (nrow(piso) > 0 && datos_personales$sueldo < 1200 && piso$precio < 600) { 
+        if (datos_personales$edad > 65 | datos_personales$edad < 35) { #si eres joven o adulto mayor te dan más ayuda
+          return("Si pides la subvención para el alquiler de vivienda habitual de la junta de Andalucía te dan un 50% de la renta")
+        } else {
+          return("Si pides la subvención para el alquiler de vivienda habitual de la junta de Andalucía te dan un 40% de la renta")
+        }
+      }
+    }
+    return(NULL)  # Si no cumple las condiciones, no mostrar nada
+  })
+  
+  # Definimos precio del piso seleccionado por el usuario
+  precio_piso <- reactive({
+    req(input$piso)
+    if (input$opcion == "Alquiler") {
+      piso <- pisos_alquiler[pisos_alquiler$id == input$piso, ]
+      return(piso$precio)
+    } else {
+      piso <- pisos_venta[pisos_venta$id == input$piso, ]
+      return(piso$precio)
+    }
+  })
+  
+  # Pasamos precio_piso a la función de la hipoteca
+  observeEvent(input$calcula_hipoteca, {
+    showModal(modalDialog(
+      title = "Simulación de Hipoteca",
+      parte3_ui(ns("hipoteca")),
+      size = "l",  # Tamaño grande de la ventana
+      easyClose = TRUE
+    ))
+    callModule(parte3_server, "hipoteca", precio_piso = precio_piso)
+  })
+}
+
+```
+
+
+## Parte 3
+
+Esta parte estaría dentro de parte 2.
+
+```{r}
+# UI para la selección de hipoteca
+parte3_ui <- function(id) {
+  ns <- NS(id)
+  tagList(
+    h5("Te mostramos la tabla de amortización de tu hipoteca"),
+    
+    p("Una hipoteca es un préstamo que haces con el banco, éste está garantizado con la misma vivienda y en algunos casos, con también un aval. El plazo de amortización se encuentra entre 15 y 30 años. Debes pagar el 20% de la hipoteca con tus ahorros y nosotros te calculamos una hipoteca del valor del 80% de esta vivienda seleccionada. Debes tener en cuenta que en la hipoteca variable te mostraremos valores meramente orientativos ya que el EURIBOR es algo que cambia constantemente y no podemos conocer su valor exacto futuro."),
+    
+    tags$p("Por favor, recuerda pulsar el botón cada vez que hagas un cambio a las opciones.", 
+         style = "font-size: 15px; color: lightcoral;"),
+    
+    selectInput(ns("tipo_hipoteca"), "Tipo de hipoteca:", 
+                choices = c("Fija", "Variable")),
+    
+    selectInput(ns("year"), "Elige a cuántos años quieres poner tu hipoteca:", 
+                choices = seq(15,30)),
+    
+    actionButton(ns("calcular"), "Mostrar tabla"),
+    tableOutput(ns("tabla_pagos"))
+  )
+}
+
+#Calculamos los pagos de la hipoteca
+parte3_server <- function(input, output, session, precio_piso) {
+  observeEvent(input$calcular, {
+    req(precio_piso())
+    
+    # Parámetros de la hipoteca
+    C0 = precio_piso()*0.8  # Precio del 80% del piso que es lo que te dan de hipoteca
+    np = as.numeric(input$year)  # Plazo de la hipoteca en meses
+    
+    # Llamar a la función para calcular la tabla de amortización
+    if (input$tipo_hipoteca == "Fija") {
+      tabla = Hipoteca_fija(C0, np)
+    } else {                 #Si no es fija, es variable
+      tabla = Hipoteca_variable(C0, np)
+    }
+    
+    # Mostrar la tabla de amortización
+    output$tabla_pagos <- renderTable({
+      tabla
+    })
+  })
+}
+
+```
+
+
+## Base de nuestra app
+
+```{r}
+
+ui <- fluidPage(
+  theme = bs_theme(bootswatch = "minty"),  #Le damos un tema a nuestro simulador para que se vea más bonito
+  
+  titlePanel("Bienvenido al Simulador de Alquiler vs Compra"),
+  
+  p("Esto es un trabajo en grupo para la asignatura de Matemáticas de las Operaciones Financieras realizado por Patricia Cabrera Fernández y Daniel Haro Polonio"),
+  
+  # Página de navegación para alternar entre las etapas
+  tabsetPanel(
+    id = "tabs",
+    
+    # Primera pestaña: Introducción de datos personales
+    tabPanel("Datos Personales", parte1_ui("datos_personales")),
+    
+    # Segunda pestaña: Opciones de vivienda
+    tabPanel("Opciones de Vivienda", 
+             parte2_ui("opciones_vivienda"),
+             uiOutput("hipoteca_ui")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  # 2. Llamamos a parte1 para capturar datos personales
+  datos_personales <- callModule(parte1_server, "datos_personales")
+  
+  # 3. Llamamos a parte2 para mostrar opciones de vivienda
+  callModule(parte2_server, "opciones_vivienda", datos_personales = datos_personales)
+}
+
+shinyApp(ui, server)
+
+```
+
+# Conclusión 
+
+El simulador nos permite identificar de manera clara las diferencias entre comprar un piso y alquilarlo. Si bien el alquiler suele ser más asequible que las hipotecas, la principal diferencia radica en que las hipotecas están definidas en un periodo de tiempo determinado, mientras que la duración del alquiler depende de lo que decida el inquilino. Además, en el caso de la compra de un piso, hay que considerar que la propiedad pasa a ser tuya, lo que puede generar beneficios a largo plazo y añadir un valor tangible a tu patrimonio.
+
+El objetivo del simulador es que, al ingresar los datos personales de cada usuario, este pueda tomar una decisión informada, evaluando cuál de las dos opciones le resulta más ventajosa. Además, permitirá ver si la diferencia entre alquilar y comprar es suficientemente significativa como para justificar una u otra elección.
