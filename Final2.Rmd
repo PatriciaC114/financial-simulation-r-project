@@ -516,7 +516,7 @@ ui <- fluidPage(
   
   titlePanel("Bienvenido al Simulador de Alquiler vs Compra"),
   
-  p("Esto es un trabajo en grupo para la asignatura de Matemáticas de las Operaciones Financieras realizado por Patricia Cabrera Fernández y Daniel Haro Polonio"),
+  p("Esto es un trabajo en grupo para la asignatura de Matemáticas de las Operaciones Financieras realizado por Patricia Cabrera Fernández"),
   
   # Página de navegación para alternar entre las etapas
   tabsetPanel(
